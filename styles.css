@@ -2,40 +2,71 @@
   --bg-color: #1e1e1e;
   --sidebar-color: #252526;
   --text-color: #d4d4d4;
-  --accent-color: #0078d4;
+  --accent-color: #4c4c4c;
+  --accent-color2: #6c6869;
   --card-bg: #2d2d30;
 }
-
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .container {
-  display: flex;
-  height: 100vh;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .sidebar {
-  width: 250px;
-  background-color: var(--sidebar-color);
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    width: 250px;
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    background-color: var(--sidebar-color);
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    height: 100vh;
+    overflow-y: auto;
+	position: relative;
+}
+.search-container {
+    position: absolute;
+    bottom: 70px;
+    left: 15px;
+    width: calc(100% - 60px);
+}
+
+#search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--accent-color);
+    border-radius: 7px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+#search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
 }
 
 .content {
-  flex-grow: 1;
-  padding: 20px;
-  overflow-y: auto;
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    position: relative;
+    width: calc(100% - 250px); /* Ensure content width is correct */
 }
 
+
 #notes-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 100%; /* Ensure notes container doesn't overflow */
 }
 
 .note-card {
@@ -76,7 +107,7 @@ button {
 }
 
 button:hover {
-  background-color: #005a9e;
+  background-color: #707070;
 }
 
 #add-note {
@@ -110,19 +141,28 @@ button:hover {
 }
 
 #categories li.active {
+  color: #ffffff;
   background-color: var(--accent-color);
 }
-
 .edit-view {
-    position: fixed;
+    position: fixed; /* Change to fixed positioning */
     top: 0;
-    left: 250px; /* Adjust based on your sidebar width */
-    width: calc(100% - 250px);
-    height: 100%;
-    background-color: #e0e0e0;
+    right: -100%;
+    width: calc(100% - 280px);
+    height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     flex-direction: column;
-    animation: slideIn 0.3s ease;
+    z-index: 1000;
+    transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 0;
+    overflow-y: auto; /* Allow scrolling within edit view if needed */
+}
+
+.edit-view.open {
+    right: 0;
+    opacity: 1;
 }
 
 .edit-view header {
@@ -130,13 +170,15 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #d3d3d3;
+    background-color: var(--sidebar-color);
 }
 
 .edit-view main {
     flex-grow: 1;
     padding: 20px;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .edit-view footer {
@@ -144,25 +186,33 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
-    background-color: #d3d3d3;
+    background-color: var(--sidebar-color);
+}
+
+
+#note-title,
+#note-content,
+#note-category {
+	border-radius: 9px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--accent-color2);
 }
 
 #note-title {
     font-size: 24px;
     border: none;
     background: transparent;
-    flex-grow: 1;
-    margin-right: 20px;
+    margin-bottom: 20px;
+    padding: 5px;
 }
 
 #note-content {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background-color: #f0f0f0;
+    flex-grow: 1;
     resize: none;
     padding: 20px;
     font-size: 16px;
+    margin-bottom: 20px;
 }
 
 #note-category {
@@ -170,33 +220,222 @@ button:hover {
     border-radius: 5px;
 }
 
+#note-color {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 27px;
+    height: 25px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+#note-color::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+#note-color::-webkit-color-swatch {
+    border: none;
+	border-radius: 3px;
+    box-shadow: 0 0 0 2px var(--accent-color), 0 0 0 0px var(--accent-color);
+}
+
+#note-color::-moz-color-swatch {
+    border: none;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px var(--accent-color), 0 0 0 0px var(--accent-color);
+}
+
+#note-color:focus {
+    outline: none;
+}
+
+/* Adjust the note-meta class to align items */
+.note-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.note-meta-left {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adjust this value to control spacing between dropdown and color selector */
+}
+
+
 #close-edit, #save-note {
     padding: 5px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    color: white;
 }
 
 #close-edit {
-    background-color: #ff4d4d;
-    color: white;
+    background-color: #c4c4c4;
+	color: var(--bg-color);
 }
 
 #save-note {
+	height: 38px;
+	width: 90px;
+	font-size: 18px;
     background-color: #4CAF50;
-    color: white;
 }
 
-#note-color {
-  width: 50px;
-  height: 50px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  overflow: hidden;
+.sync-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }
 
-#add-category {
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
   width: 100%;
-  margin-top: 20px;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: var(--bg-color);
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid var(--accent-color);
+  width: 80%;
+  max-width: 500px;
+}
+
+.modal-content input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.modal-content button {
+  margin-right: 10px;
+}
+
+/* Add these styles to your existing CSS */
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  height:35px;
+  width: 35px;
+  padding: 5px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: var(--text-color);
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.icon-button.syncing .icon {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px gold;
+  }
+  50% {
+    box-shadow: 0 0 10px gold;
+  }
+  100% {
+    box-shadow: 0 0 5px gold;
+  }
+}
+
+#save-note.glow {
+  animation: glow 10s ease-in-out infinite;
+}
+
+
+
+/* Add these media queries at the end of your existing CSS */
+
+@media screen and (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+    }
+  .sidebar {
+    display: none;
+  }
+  .search-container, .sync-controls {
+        display: none;
+   }
+
+  .content {
+    width: 100%;
+    padding: 10px;
+    margin-left: 0;
+  }
+
+  #notes-container {
+	max-width: 350px;
+    grid-template-columns: 1fr;
+  }
+
+  .edit-view {
+    width: 100%;
+    height: 100vh;
+    right: -100%;
+  }
+
+  .edit-view.open {
+    right: 0;
+  }
+
+  #add-note {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .sync-controls {
+    top: 10px;
+    right: 30px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .note-card {
+    padding: 10px;
+  }
+
+  #add-note {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .edit-view header,
+  .edit-view footer {
+    padding: 10px;
+  }
+
+  #note-title,
+  #note-content,
+  #note-category {
+    font-size: 14px;
+  }
+
+  #save-note {
+    height: 32px;
+    width: 80px;
+    font-size: 16px;
+  }
 }

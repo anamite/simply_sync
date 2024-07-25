@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Note Taking App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>All categories</h2>
+            <ul id="categories">
+                <!-- Categories will be dynamically added here -->
+            </ul>
+            <button id="add-category">+ Add Category</button>
+        </aside>
+        <main class="content">
+            <div id="notes-container">
+                <!-- Notes will be dynamically added here -->
+            </div>
+        </main>
+    </div>
+    <div id="edit-view" class="edit-view">
+        <header>
+            <button id="close-edit">Close</button>
+            <h2 id="edit-title">Edit Note</h2>
+            <button id="save-note">Save</button>
+        </header>
+        <main>
+            <input type="text" id="note-title" placeholder="Title">
+            <textarea id="note-content" placeholder="Content"></textarea>
+            <div class="note-meta">
+                <select id="note-category">
+                    <!-- Categories will be dynamically added here -->
+                </select>
+                <input type="color" id="note-color" value="#ffffff">
+            </div>
+        </main>
+    </div>
+    <button id="add-note">+</button>
+    <script src="app.js"></script>
+</body>
+</html>

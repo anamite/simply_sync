@@ -105,6 +105,12 @@ searchInput.addEventListener('input', (e) => {
     if (keyword) {
         const filteredNotes = searchNotes(keyword);
         renderFilteredNotes(filteredNotes);
+
+        // Highlight the first result
+        const firstResult = document.querySelector('.note-card');
+        if (firstResult) {
+            firstResult.classList.add('highlighted');
+        }
     } else {
         renderNotes(); // Render all notes when search is empty
     }
@@ -112,10 +118,11 @@ searchInput.addEventListener('input', (e) => {
 
 // Modify your existing renderNotes function to use the new renderFilteredNotes function
 function renderNotes() {
-    const filteredNotes = currentCategory === 'All categories' 
-        ? notes 
+    const filteredNotes = currentCategory === 'All categories'
+        ? notes
         : notes.filter(note => note.category === currentCategory);
     renderFilteredNotes(filteredNotes);
+
 }
 
 function openEditView(note = null) {
@@ -134,7 +141,7 @@ function openEditView(note = null) {
     saveNoteBtn.classList.remove('glow');
 
     // Focus on the title input
-    noteTitleInput.focus();
+    quill.focus();
 }
 
 
@@ -405,6 +412,16 @@ document.addEventListener('keydown', function(e) {
 		if (!editView.classList.contains('open')) {
             openEditView();
 		}
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const highlightedElement = document.querySelector('.note-card.highlighted');
+        console.log(highlightedElement);
+        if (highlightedElement) {
+            openEditView(highlightedElement);
+        }
     }
 });
 noteTitleInput.addEventListener('input', checkForChanges);

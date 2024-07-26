@@ -18,6 +18,7 @@ body {
 .container {
     position: relative;
     height: 100vh;
+    width: 100%;
     overflow: hidden;
 }
 
@@ -32,7 +33,6 @@ body {
     align-items: center;
     padding: 0 20px;
     background-color: var(--sidebar-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     z-index: 1000;
 }
 
@@ -79,14 +79,14 @@ body {
     padding: 45px 163px 20px; /* Add top padding to account for the top bar */
     overflow-y: auto;
     max-height: calc(100vh - 60px); /* Extend to max height */
-
+    max-width: 100%;
     background-color: var(--bg-color);
 }
 
 
 #notes-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
     max-width: 100%; /* Ensure notes container doesn't overflow */
 }
@@ -98,7 +98,9 @@ body {
   max-width: 100%;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.2s ease;
+    animation: fadeIn 0.3s ease-in-out;
+    outline: none; /* Remove default outline */
+    transition: transform 0.2s ease;
 }
 
 .note-card:hover {
@@ -110,6 +112,10 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Add styles for the highlighted note card */
+.note-card.highlighted {
+    box-shadow: 0 0 5px 0.1px var(--accent-color); /* Add custom highlight style */
 }
 
 .note-card p {
@@ -205,7 +211,7 @@ button:hover {
   font-size: 28px;
   font-weight: bold;
   border: none;
-  max-width: 80%;
+  max-width: 95%;
   background: transparent;
   color: var(--text-color);
 }
@@ -317,10 +323,11 @@ button:hover {
 }
 
 #close-edit {
+    order: -1; /* Move the close button to the left */
+    margin-right: auto; /* Ensure it stays on the left side */
     background-color: var(--sidebar-color);
 	Padding: 5px;
 	height: 45px;
-	transform: rotate(180deg);
 	color: var(--accent-color);
 }
 
@@ -407,6 +414,18 @@ button:hover {
 
 #save-note.glow {
   animation: glow 10s ease-in-out infinite;
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Quill editor styling */

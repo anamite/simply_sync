@@ -85,14 +85,20 @@ function renderFilteredNotes(filteredNotes) {
         const noteCard = document.createElement('div');
         noteCard.className = 'note-card';
         noteCard.style.borderLeft = `5px solid ${note.color || '#ffffff'}`;
+
+        // Convert newlines back to <br> for display
+        const noteContent = note.content.replace(/\n/g, '<br>');
+
         noteCard.innerHTML = `
             <h3>${note.title}</h3>
-            <p>${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}</p>
+            <p>${noteContent.substring(0, 100)}${noteContent.length > 100 ? '...' : ''}</p>
         `;
         noteCard.onclick = () => openEditView(note);
         notesContainer.appendChild(noteCard);
     });
 }
+
+
 
 searchInput.addEventListener('input', (e) => {
     const keyword = e.target.value.trim();
@@ -114,22 +120,24 @@ function renderNotes() {
 
 function openEditView(note = null) {
     noteTitleInput.value = note ? note.title : 'New Note';
-    quill.setContents(note ? quill.clipboard.convert(note.content) : '');
+    quill.setContents(note ? quill.clipboard.convert(note.content.replace(/\n/g, '<br>')) : '');
     noteColorInput.value = note ? note.color : '#ffffff';
     updateCategoryDropdown(note ? note.category : null);
     editingNoteId = note ? note.id : null;
     editView.classList.add('open');
-    
+
     // Store original values
     originalTitle = noteTitleInput.value;
     originalContent = quill.root.innerHTML;
-    
+
     // Remove glow effect when opening the edit view
     saveNoteBtn.classList.remove('glow');
 
     // Focus on the title input
     noteTitleInput.focus();
 }
+
+
 
 // Add these functions to check for changes and update the glow effect
 function checkForChanges() {
@@ -164,9 +172,23 @@ noteCategorySelect.addEventListener('change', function() {
 function closeEditView() {
     editView.classList.remove('open');
 }
+function sanitizeContent(content) {
+    return content.replace(/&nbsp;/g, ' ')
+        .replace(/<br\s*\/?>/g, '\n')
+        .replace(/<p>\s*<\/p>/g, '') // Remove empty paragraphs
+        .replace(/<p>/g, '\n')
+        .replace(/<\/p>/g, '')
+        .replace(/\n\s*\n/g, '\n') // Remove multiple newlines
+        .trim();
+}
+
 function saveNote() {
     const title = noteTitleInput.value.trim();
-    const content = quill.root.innerHTML.trim(); // Get content from Quill editor
+    let content = quill.root.innerHTML.trim(); // Get content from Quill editor and trim it
+
+    // Sanitize content
+    content = sanitizeContent(content);
+
     const category = noteCategorySelect.value;
     const color = noteColorInput.value;
     const lastModified = Date.now();
@@ -181,13 +203,22 @@ function saveNote() {
         notes.push(newNote);
     }
 
+    // Sanitize content before saving to local storage
+    notes = notes.map(note => ({
+        ...note,
+        content: sanitizeContent(note.content)
+    }));
+
     saveToLocalStorage();
     renderNotes();
     closeEditView();
-    
+
     // Remove glow effect after saving
     saveNoteBtn.classList.remove('glow');
 }
+
+
+
 function addCategory() {
     const category = prompt('Enter new category name:');
     if (category && !categories.includes(category)) {

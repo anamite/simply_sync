@@ -23,6 +23,17 @@ let originalTitle = '';
 let originalContent = '';
 
 const searchInput = document.getElementById('search-input');
+const quill = new Quill('#editor', {
+  modules: {
+    toolbar: [
+      
+      ['bold', 'italic', 'underline'],
+      ['code-block'],
+    ],
+  },
+  placeholder: 'Compose an epic...',
+  theme: 'snow', // or 'bubble'
+});
 
 
 let dbUrl = localStorage.getItem('dbUrl') || '';
@@ -102,9 +113,8 @@ function renderNotes() {
 }
 
 function openEditView(note = null) {
-    editTitle.textContent = note ? `Edit Note: ${note.title}` : 'New Note';
-    noteTitleInput.value = note ? note.title : '';
-    noteContentInput.value = note ? note.content : '';
+    noteTitleInput.value = note ? note.title : 'New Note';
+    quill.setContents(note ? quill.clipboard.convert(note.content) : '');
     noteColorInput.value = note ? note.color : '#ffffff';
     updateCategoryDropdown(note ? note.category : null);
     editingNoteId = note ? note.id : null;
@@ -112,20 +122,24 @@ function openEditView(note = null) {
     
     // Store original values
     originalTitle = noteTitleInput.value;
-    originalContent = noteContentInput.value;
+    originalContent = quill.root.innerHTML;
     
     // Remove glow effect when opening the edit view
     saveNoteBtn.classList.remove('glow');
+
+    // Focus on the title input
+    noteTitleInput.focus();
 }
 
 // Add these functions to check for changes and update the glow effect
 function checkForChanges() {
-    if (noteTitleInput.value !== originalTitle || noteContentInput.value !== originalContent) {
+    if (noteTitleInput.value !== originalTitle || quill.root.innerHTML !== originalContent) {
         saveNoteBtn.classList.add('glow');
     } else {
         saveNoteBtn.classList.remove('glow');
     }
 }
+
 
 function updateCategoryDropdown(selectedCategory = null) {
     noteCategorySelect.innerHTML = categories.map(category => 
@@ -152,7 +166,7 @@ function closeEditView() {
 }
 function saveNote() {
     const title = noteTitleInput.value.trim();
-    const content = noteContentInput.value.trim();
+    const content = quill.root.innerHTML.trim(); // Get content from Quill editor
     const category = noteCategorySelect.value;
     const color = noteColorInput.value;
     const lastModified = Date.now();
@@ -234,7 +248,17 @@ async function syncWithDatabase() {
         }
 
         const dbNotes = await response.json();
+		
+		    // Extract unique categories from database notes
+    const dbCategories = [...new Set(dbNotes.map(note => note.category))];
 
+    // Update local categories
+    dbCategories.forEach(category => {
+      if (!categories.includes(category)) {
+        categories.push(category);
+      }
+    });
+	
         // Merge database notes with local notes, prioritizing local changes
         dbNotes.forEach(dbNote => {
             const localNote = notes.find(note => note.id === dbNote.id);
@@ -304,6 +328,7 @@ async function syncWithDatabase() {
         }
 
         saveToLocalStorage();
+		renderCategories(); // Add this line to update the categories in the sidebar
         renderNotes();
         stopSyncAnimation();
     alert('Sync completed successfully!');
@@ -316,16 +341,22 @@ async function syncWithDatabase() {
 
 
 // Event listeners
+// Global key event listener
 document.addEventListener('keydown', function(e) {
+    // Check if Ctrl+S is pressed
     if (e.ctrlKey && e.key === 's') {
         e.preventDefault(); // Prevent the default save action
-        if (editView.classList.contains('open')) {
+        
+        // Check if we're not in the edit view
+        if (!editView.classList.contains('open')) {
+            syncWithDatabase();
+        } else {
+            // If in edit view, perform the save action (you already have this part)
             saveNote();
             closeEditView();
         }
     }
 });
-
 document.addEventListener('keydown', function(e) {
     // Check if Ctrl + F is pressed
     if (e.ctrlKey && e.key === 'f') {
@@ -336,8 +367,18 @@ document.addEventListener('keydown', function(e) {
         searchInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 });
+document.addEventListener('keydown', function(e) {
+    // Check if Ctrl + N is pressed
+    if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault(); // Prevent the default browser search
+		if (!editView.classList.contains('open')) {
+            openEditView();
+		}
+    }
+});
 noteTitleInput.addEventListener('input', checkForChanges);
-noteContentInput.addEventListener('input', checkForChanges);
+quill.on('text-change', checkForChanges);
+
 addNoteBtn.onclick = () => openEditView();
 closeEditBtn.onclick = closeEditView;
 saveNoteBtn.onclick = saveNote;

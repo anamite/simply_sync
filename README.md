@@ -62,6 +62,11 @@ This project is licensed under the MIT License.
 
 ![image](https://github.com/user-attachments/assets/7ac83530-953b-4e1e-a805-b4a16db73262)
 
+### Comning soon
+Theme changer:
+![image](https://github.com/user-attachments/assets/e03ccbc8-112d-48c3-aebc-363fe7b8906b)
+
+
 ## Contact
 
 For any questions or issues, please contact [Your Email] or open an issue on the [GitHub repository](repository-link).

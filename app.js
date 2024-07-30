@@ -52,6 +52,7 @@ function saveToLocalStorage() {
 }
 
 function renderCategories() {
+    const isMobile = window.innerWidth <= 768;
     categoriesList.innerHTML = `<li class="${currentCategory === 'All categories' ? 'active' : ''}" data-category="All categories">All categories</li>`;
     categories.forEach(category => {
         const li = document.createElement('li');
@@ -60,7 +61,7 @@ function renderCategories() {
         if (category === currentCategory) li.classList.add('active');
         categoriesList.appendChild(li);
     });
-    
+
     // Add click event listener to the categories list
     categoriesList.onclick = (e) => {
         if (e.target.tagName === 'LI') {
@@ -69,8 +70,24 @@ function renderCategories() {
             renderNotes();
         }
     };
+
+    // Conditionally render the dropdown for mobile screens
+    if (isMobile) {
+        noteCategorySelect.style.display = 'block';
+        updateCategoryDropdown(currentCategory);
+    } else {
+        noteCategorySelect.style.display = 'none';
+    }
 }
 
+function handleResize() {
+    renderCategories();
+}
+window.addEventListener('resize', handleResize);
+
+// Initial render
+renderCategories();
+renderNotes();
 function searchNotes(keyword) {
     const lowercasedKeyword = keyword.toLowerCase();
     return notes.filter(note => 
@@ -116,6 +133,13 @@ searchInput.addEventListener('input', (e) => {
     }
 });
 
+categoriesList.addEventListener('click', (e) => {
+    if (e.target.tagName === 'LI' && editView.classList.contains('open')) {
+        currentCategory = e.target.dataset.category;
+        renderCategories();
+    }
+});
+
 // Modify your existing renderNotes function to use the new renderFilteredNotes function
 function renderNotes() {
     const filteredNotes = currentCategory === 'All categories'
@@ -129,9 +153,12 @@ function openEditView(note = null) {
     noteTitleInput.value = note ? note.title : 'New Note';
     quill.setContents(note ? quill.clipboard.convert(note.content.replace(/\n/g, '<br>')) : '');
     noteColorInput.value = note ? note.color : '#ffffff';
-    updateCategoryDropdown(note ? note.category : null);
     editingNoteId = note ? note.id : null;
     editView.classList.add('open');
+
+    // Highlight the selected category in the side panel
+    currentCategory = note ? note.category : 'All categories';
+    renderCategories();
 
     // Store original values
     originalTitle = noteTitleInput.value;
@@ -143,7 +170,6 @@ function openEditView(note = null) {
     // Focus on the title input
     quill.focus();
 }
-
 
 
 // Add these functions to check for changes and update the glow effect
@@ -196,7 +222,7 @@ function saveNote() {
     // Sanitize content
     content = sanitizeContent(content);
 
-    const category = noteCategorySelect.value;
+    const category = currentCategory; // Use the selected category from the side panel
     const color = noteColorInput.value;
     const lastModified = Date.now();
 
@@ -223,7 +249,6 @@ function saveNote() {
     // Remove glow effect after saving
     saveNoteBtn.classList.remove('glow');
 }
-
 
 
 function addCategory() {
@@ -376,6 +401,88 @@ async function syncWithDatabase() {
     alert('Failed to sync with database. Please check your configuration and try again.');
   }
 }
+function renderCalendar() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const currentDate = today.getDate();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    let calendarHTML = `
+    <table>
+      <caption>${monthNames[month]} ${year}</caption>
+      <tr>
+        <th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th>
+      </tr>
+      <tr>
+  `;
+
+    let day = 1;
+    for (let i = 0; i < 42; i++) {
+        if (i < startingDay || day > daysInMonth) {
+            calendarHTML += "<td></td>";
+        } else {
+            const highlightClass = (day === currentDate) ? 'highlight' : '';
+            calendarHTML += `<td class="${highlightClass}">${day}</td>`;
+            day++;
+        }
+        if ((i + 1) % 7 === 0) {
+            calendarHTML += "</tr><tr>";
+        }
+    }
+
+    calendarHTML += "</tr></table>";
+
+    document.getElementById('calendar').innerHTML = calendarHTML;
+}
+/* dkspkasdkosa */
+document.getElementById('settings-button').addEventListener('click', function() {
+    document.getElementById('settings-modal').style.display = 'block';
+});
+
+document.getElementById('close-settings-modal').addEventListener('click', function() {
+    document.getElementById('settings-modal').style.display = 'none';
+});
+
+document.getElementById('save-settings').addEventListener('click', function() {
+    const fileInput = document.getElementById('background-image');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageUrl = e.target.result;
+            localStorage.setItem('backgroundImage', imageUrl);
+            document.body.style.backgroundImage = `url(${imageUrl})`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+        };
+        reader.readAsDataURL(file);
+    }
+    document.getElementById('settings-modal').style.display = 'none';
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const savedImage = localStorage.getItem('backgroundImage');
+    if (savedImage) {
+        document.body.style.backgroundImage = `url(${savedImage})`;
+        document.body.style.backgroundSize = 'cover'; // or 'contain'
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        document.getElementById('glass-overlay').style.zIndex = '-1';
+    }
+});
+// Call renderCalendar when the page loads
+
+// Call renderCalendar when the page loads
+document.addEventListener('DOMContentLoaded', renderCalendar);
 
 
 // Event listeners

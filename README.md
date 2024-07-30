@@ -69,4 +69,4 @@ Theme changer:
 
 ## Contact
 
-For any questions or issues, please contact [Your Email] or open an issue on the [GitHub repository](repository-link).
+For any questions or issues, please open an issue on the [GitHub repository]([repository-link](https://github.com/anamite/simply_sync)).

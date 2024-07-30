@@ -459,7 +459,7 @@ button:hover {
     position: fixed;
     right: 0;
     top: 60px; /* Height of the top-bar */
-    width: 300px;
+    width: 240px;
     background-color: var(--sidebar-color);
     padding: 20px;
     overflow-y: auto;

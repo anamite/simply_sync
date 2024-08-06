@@ -10,10 +10,11 @@
 - **Modern UI:** Experience a clean and modern user interface.
 
 ## Using simply sync
-
-Simply Sync is a web-based application. To set up the sync feature with your database, follow these steps:
-
 Live:  [simply_sync](https://anamite.github.io/simply_sync/)
+
+Simply Sync is a web-based application. 
+To set up the **sync feature with your database,**  follow these steps:
+
 1. Go to [restdb.io](https://restdb.io).
 2. Create an account and set up a new database.
 3. Inside the database, create the following columns: `category`, `title`, `content`, `id`, and `color`.

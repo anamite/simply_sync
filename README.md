@@ -9,10 +9,11 @@
 - **Categorization:** Organize your notes with categories, colors, and names.
 - **Modern UI:** Experience a clean and modern user interface.
 
-## Using it live
+## Using simply sync
 
 Simply Sync is a web-based application. To set up the sync feature with your database, follow these steps:
-Web app: [simply_sync](https://anamite.github.io/simply_sync/).
+
+Live:  [simply_sync](https://anamite.github.io/simply_sync/)
 1. Go to [restdb.io](https://restdb.io).
 2. Create an account and set up a new database.
 3. Inside the database, create the following columns: `category`, `title`, `content`, `id`, and `color`.
